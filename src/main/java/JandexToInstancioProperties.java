@@ -8,9 +8,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Properties;
+import java.util.*;
 
 public class JandexToInstancioProperties {
 
@@ -49,7 +47,14 @@ public class JandexToInstancioProperties {
             }
         }
         try {
-            instancioMappingProperties.store(Files.newOutputStream(Paths.get("src/test/resources/instancio.properties")), null);
+            Properties sortedInstancioMappingProperties = new Properties() {
+                @Override
+                public synchronized Enumeration<Object> keys() {
+                    return Collections.enumeration(new TreeSet<Object>(super.keySet()));
+                }
+            };
+            sortedInstancioMappingProperties.putAll(instancioMappingProperties);
+            sortedInstancioMappingProperties.store(Files.newOutputStream(Paths.get("src/test/resources/instancio.properties")), null);
         } catch (IOException e) {
             log.error("Failed to write instancio properties. ", e);
         }
@@ -61,7 +66,7 @@ public class JandexToInstancioProperties {
         FileInputStream inputPropertyStream = null;
         try {
             Path instancioPropertiesPath = Paths.get("src/test/resources/instancio.properties");
-            if (Files.notExists(instancioPropertiesPath)) {
+            if (!Files.exists(instancioPropertiesPath)) {
                 return existingInstancioProp; // empty properties
             }
             existingInstancioProp.load(new FileInputStream(instancioPropertiesPath.toString()));
