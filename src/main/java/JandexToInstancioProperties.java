@@ -4,9 +4,9 @@ import org.jboss.jandex.IndexReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Iterator;
@@ -30,7 +30,8 @@ public class JandexToInstancioProperties {
     }
 
     private static void generateInstancioProperties(Index index){
-        Properties instancioMappingProperties = new Properties();
+        Properties instancioMappingProperties = loadExistingInstancioProperties();
+
         for (ClassInfo c : index.getKnownClasses()) {
             if (c.isInterface()) {
                 Collection<ClassInfo> impls = index.getAllKnownImplementors(c.name());
@@ -53,5 +54,22 @@ public class JandexToInstancioProperties {
             log.error("Failed to write instancio properties. ", e);
         }
         log.info("Instancio properties written to src/test/resources");
+    }
+
+    private static Properties loadExistingInstancioProperties() {
+        Properties existingInstancioProp = new Properties();
+        FileInputStream inputPropertyStream = null;
+        try {
+            Path instancioPropertiesPath = Paths.get("src/test/resources/instancio.properties");
+            if (Files.notExists(instancioPropertiesPath)) {
+                return existingInstancioProp; // empty properties
+            }
+            existingInstancioProp.load(new FileInputStream(instancioPropertiesPath.toString()));
+        } catch (FileNotFoundException e) {
+            log.error("instancio properties ", e);
+        } catch (IOException e) {
+            log.error("Failed to load instancio properties ", e);
+        }
+        return existingInstancioProp;
     }
 }
