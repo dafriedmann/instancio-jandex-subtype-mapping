@@ -15,9 +15,9 @@ from https://www.instancio.org/user-guide/#overriding-settings-using-a-propertie
 
 This project shows how [jandex](https://github.com/smallrye/jandex) can be used to automatically generate the mapping inside the instancio.properties from the given class structure.
 
-1. Generate jandex index
+Generate jandex index and run propertie file generation:
 ```bash
-mvn clean package -P jandex -DskipTests=true
+mvn package -P generate-instancio -DskipTests=true
 ```
-2. Run `JandexToInstancioProperties` main in IDE to generate idx.
-instancio.properties is generated under `src/test/resources`.
+
+The profile `generate-instancio` first creates the jandex idx and then generates the instancio properties using maven exec plugin and running `ExecJandexToInstancioProperties`.
