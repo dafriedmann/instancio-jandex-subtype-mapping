@@ -1,3 +1,5 @@
+package de.dafriedmann.instancio;
+
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.Index;
 import org.jboss.jandex.IndexReader;
@@ -10,16 +12,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class JandexToInstancioProperties {
+public class ExecJandexToInstancioProperties {
 
-    private static Logger log = LoggerFactory.getLogger(JandexToInstancioProperties.class);
+    private static Logger log = LoggerFactory.getLogger(ExecJandexToInstancioProperties.class);
 
     public static void main(String[] args) throws IOException {
-
-        Index index;
         try (FileInputStream input = new FileInputStream("target/classes/META-INF/jandex.idx")) {
             IndexReader reader = new IndexReader(input);
-            index = reader.read();
+            Index index = reader.read();
             generateInstancioProperties(index);
         }
         catch (IOException e){
@@ -30,22 +30,25 @@ public class JandexToInstancioProperties {
     private static void generateInstancioProperties(Index index){
         Properties instancioMappingProperties = loadExistingInstancioProperties();
 
-        for (ClassInfo c : index.getKnownClasses()) {
-            if (c.isInterface()) {
-                Collection<ClassInfo> impls = index.getAllKnownImplementors(c.name());
-                if (impls.isEmpty()) {
-                    break; // no impl found -> skip
-                }
-                // Add impl to properties
-                Iterator<ClassInfo> implsIterator = impls.iterator();
-                String key = "subtype." + c.name();
-                String value = implsIterator.next().name().toString(); // only use first
-                instancioMappingProperties.putIfAbsent(key, value);
-                if(implsIterator.hasNext()){
-                    log.warn("Found another impl "+ implsIterator.next().name() +" for " + c.name());
-                }
+        List<ClassInfo> interfaces = index.getKnownClasses().stream().filter(ClassInfo::isInterface).toList();
+        for (ClassInfo c : interfaces){
+            Collection<ClassInfo> impls = index.getAllKnownImplementors(c.name());
+            if (impls.isEmpty()) {
+                continue; // no impl found -> skip
+            }
+            // Add impl to properties
+            Iterator<ClassInfo> implsIterator = impls.iterator();
+            String key = "subtype." + c.name();
+            String value = implsIterator.next().name().toString(); // only use first
+            instancioMappingProperties.putIfAbsent(key, value);
+            if(implsIterator.hasNext()){
+                log.warn("Found another impl "+ implsIterator.next().name() +" for " + c.name());
             }
         }
+        writeMappingsToInstancioProperties(instancioMappingProperties);
+    }
+
+    private static void writeMappingsToInstancioProperties(Properties instancioMappingProperties) {
         try {
             Properties sortedInstancioMappingProperties = new Properties() {
                 @Override
