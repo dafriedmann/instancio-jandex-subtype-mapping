@@ -1,3 +1,5 @@
+package de.dafriedmann.instancio;
+
 import de.dafriedmann.foo.IBar;
 import de.dafriedmann.foo.IFoo;
 import de.dafriedmann.foo.impl.Bar;
@@ -11,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class InstancioSubtypeTest {
 
     @Test
-    void testInstancioSubtypingWithGeneratedProperties(){
+    void testInstancioSubtypingWithCustomTypeResolver(){
         // If this test fails you forgot to generate the jandex index
         // see readme
 

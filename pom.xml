@@ -15,7 +15,7 @@
 
     <profiles>
         <profile>
-            <id>generate-instancio</id>
+            <id>generate-jandex-idx</id>
             <build>
                 <plugins>
                     <plugin>
@@ -39,22 +39,6 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>3.1.0</version>
-                        <configuration>
-                            <mainClass>de.dafriedmann.instancio.ExecJandexToInstancioProperties</mainClass>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <phase>process-classes</phase> <!-- now genrate properties -->
-                                <goals>
-                                    <goal>java</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -73,7 +57,7 @@
         <dependency>
             <groupId>org.instancio</groupId>
             <artifactId>instancio-junit</artifactId>
-            <version>2.9.0</version>
+            <version>2.14.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
